@@ -19,16 +19,16 @@ export class BitsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.bitsService.findOne(+id);
+    return this.bitsService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBitDto: UpdateBitDto) {
-    return this.bitsService.update(+id, updateBitDto);
+    return this.bitsService.update(id, updateBitDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.bitsService.remove(+id);
+    return this.bitsService.remove(id);
   }
 }

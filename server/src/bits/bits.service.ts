@@ -1,26 +1,73 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateBitDto } from './dto/create-bit.dto';
 import { UpdateBitDto } from './dto/update-bit.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Bit } from './schemas/bit.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class BitsService {
-  create(createBitDto: CreateBitDto) {
-    return 'This action adds a new bit';
+  constructor(@InjectModel(Bit.name) private readonly bitModel: Model<Bit>) {}
+
+  async create(createBitDto: CreateBitDto) {
+    try {
+      const createdBit = new this.bitModel(createBitDto);
+
+      return await createdBit.save();
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
-  findAll() {
-    return `This action returns all bits`;
+  async findAll() {
+    try {
+      return await this.bitModel.find();
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} bit`;
+  async findOne(id: string) {
+    try {
+      const bit = await this.bitModel.findById(id);
+
+      if (!bit) throw new NotFoundException(`Bit with ID ${id} not found`);
+
+      return bit;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
-  update(id: number, updateBitDto: UpdateBitDto) {
-    return `This action updates a #${id} bit`;
+  async update(id: string, updateBitDto: UpdateBitDto) {
+    try {
+      const updatedBit = await this.bitModel.findByIdAndUpdate(
+        id,
+        updateBitDto,
+        { new: true, runValidators: true },
+      );
+
+      if (!updatedBit) throw new NotFoundException(`Bit could not be updated`);
+
+      return updatedBit;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} bit`;
+  async remove(id: string) {
+    try {
+      const result = await this.bitModel.findByIdAndDelete(id);
+
+      if (!result) throw new NotFoundException(`Bit could not be deleted`);
+
+      return result;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }
