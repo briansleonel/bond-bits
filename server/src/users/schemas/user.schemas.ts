@@ -12,11 +12,21 @@ export class User {
   @Prop({ required: true })
   lastName: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true, index: true })
   email: string;
+
+  @Prop({ required: true })
+  password: string;
+
+  @Prop({ type: Date, max: Date.now() })
+  birthDate: Date;
 
   @Prop({ type: String, enum: Role, default: Role.USER })
   role: Role;
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.index({ email: 1 }, { unique: true });
+
+export { UserSchema };
